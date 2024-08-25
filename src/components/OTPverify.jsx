@@ -1,10 +1,18 @@
-// OTPVerify.jsx
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
 import { verifyOTP, resendOTP, clearError, verifyForgetPasswordOTP } from "../store/authSlice";
 import { toast } from "react-toastify";
+import {
+  Box,
+  TextField,
+  Typography,
+  Paper,
+  Container,
+  Button,
+  CircularProgress,
+} from "@mui/material";
 
 const OTPVerify = () => {
   const dispatch = useDispatch();
@@ -16,6 +24,7 @@ const OTPVerify = () => {
   const [email, setEmail] = useState("");
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
+  const [otpError, setOtpError] = useState("");
   
   const purpose = location.state?.purpose || 'signup';
 
@@ -46,14 +55,32 @@ const OTPVerify = () => {
     return () => clearInterval(interval);
   }, [timer]);
 
+  const handleOtpChange = (e) => {
+    const value = e.target.value.replace(/[^0-9]/g, '');
+    setOtp(value);
+    
+    if (value.length !== 6) {
+      setOtpError("OTP must be 6 digits long");
+    } else {
+      setOtpError("");
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    const action = purpose === 'resetPassword' ? verifyForgetPasswordOTP : verifyOTP
+    if (otp.length !== 6) {
+      setOtpError("OTP must be 6 digits long");
+      return;
+    }
+    const action = purpose === 'resetPassword' ? verifyForgetPasswordOTP : verifyOTP;
     dispatch(action({ otp, email }))
       .unwrap()
       .then(() => {
         if (purpose === 'resetPassword') {
           navigate("/reset-password");
+        } else if (purpose === 'technicianSignup') {
+          toast.success("Account created successfully");
+          navigate("/login-technician");
         } else {
           toast.success("Account created successfully");
           navigate("/login");
@@ -80,65 +107,117 @@ const OTPVerify = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-indigo-200 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-2xl">
-        <div>
-          <h1 className="text-center text-2xl font-extrabold">
-            <span className="text-gray-400 drop-shadow-md">Tech</span>
-            <span className="text-black-600 drop-shadow-md">Care</span>
-          </h1>
-          <h2 className="mt-6 text-center text-2xl font-bold text-gray-900">
-            Verify Your Email
-          </h2>
-        </div>
-        {error && <div className="text-red-500 text-center">{error}</div>}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="otp" className="sr-only">
-              OTP
-            </label>
-            <input
-              id="otp"
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: "linear-gradient(to bottom right, #E0E7FF, #C7D2FE)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        py: 12,
+        px: 4,
+      }}
+    >
+      <Container maxWidth="xs">
+        <Paper
+          elevation={3}
+          sx={{
+            p: 4,
+            borderRadius: 4,
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          <Box sx={{ mb: 4, textAlign: "center" }}>
+            <Typography variant="h4" component="h1" fontWeight="bold">
+              <Box component="span" sx={{ color: "blue" }}>
+                Tech
+              </Box>
+              <Box component="span" sx={{ color: "black" }}>
+                Care
+              </Box>
+            </Typography>
+            <Typography variant="h6" sx={{ mt: 2, color: 'text.secondary' }}>
+              Verify Your Email
+            </Typography>
+          </Box>
+
+          {error && (
+            <Typography color="error" align="center" sx={{ mb: 2 }}>
+              {error}
+            </Typography>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Enter OTP"
               name="otp"
               type="text"
               required
-              className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-              placeholder="Enter OTP"
               value={otp}
-              onChange={(e) => setOtp(e.target.value)}
+              onChange={handleOtpChange}
+              variant="outlined"
+              error={!!otpError}
+              helperText={otpError || "Enter the 6-digit OTP sent to your email"}
+              InputProps={{
+                sx: {
+                  '& input': {
+                    textAlign: 'center',
+                    letterSpacing: '0.5em',
+                    fontSize: '1.2em',
+                  },
+                  ...(otp.length === 6 && !otpError && {
+                    '& fieldset': {
+                      borderColor: 'green',
+                      borderWidth: 2,
+                    },
+                  }),
+                },
+              }}
             />
-          </div>
-          <div>
-            <button
+
+            <Button
               type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-300 ease-in-out transform hover:scale-105"
-              disabled={isLoading}
+              fullWidth
+              variant="contained"
+              sx={{
+                mt: 3,
+                mb: 2,
+                py: 1.5,
+                background: 'linear-gradient(45deg, #6366F1 30%, #8B5CF6 90%)',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #4F46E5 30%, #7C3AED 90%)',
+                },
+              }}
+              disabled={isLoading || otp.length !== 6}
+              startIcon={<IoCheckmarkCircleOutline />}
             >
-              <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                <IoCheckmarkCircleOutline
-                  className="h-5 w-5 text-purple-300 group-hover:text-purple-200"
-                  aria-hidden="true"
-                />
-              </span>
-              {isLoading ? "Verifying..." : "Verify OTP"}
-            </button>
-          </div>
-        </form>
-        <div className="text-center mt-4">
-          <button
-            onClick={handleResendOTP}
-            className={`font-medium ${
-              canResend
-                ? "text-purple-600 hover:text-purple-500"
-                : "text-gray-400 cursor-not-allowed"
-            }`}
-            disabled={!canResend || isLoading}
-          >
-            {canResend ? "Resend OTP" : `Resend OTP in ${timer}s`}
-          </button>
-        </div>
-      </div>
-    </div>
+              {isLoading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "Verify OTP"
+              )}
+            </Button>
+          </form>
+
+          <Box sx={{ textAlign: "center", mt: 2 }}>
+            <Button
+              onClick={handleResendOTP}
+              disabled={!canResend || isLoading}
+              sx={{
+                color: canResend ? 'primary.main' : 'text.disabled',
+                '&:hover': {
+                  backgroundColor: canResend ? 'rgba(0, 0, 0, 0.04)' : 'transparent',
+                },
+              }}
+            >
+              {canResend ? "Resend OTP" : `Resend OTP in ${timer}s`}
+            </Button>
+          </Box>
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 

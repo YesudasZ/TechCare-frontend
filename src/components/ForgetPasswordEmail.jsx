@@ -1,64 +1,144 @@
-import { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { initiateForgetPassword } from '../store/authSlice';
-import { toast } from 'react-toastify';
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { initiateForgetPassword } from "../store/authSlice";
+import { toast } from "react-toastify";
+import {
+  Box,
+  TextField,
+  Typography,
+  Paper,
+  Container,
+  Button,
+} from "@mui/material";
 
 const ForgetPasswordEmail = () => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const validateEmail = (email) => {
+    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return re.test(String(email).toLowerCase());
+  };
+
+  const handleEmailChange = (e) => {
+    const value = e.target.value;
+    setEmail(value);
+    if (!value) {
+      setEmailError("Email is required");
+    } else if (!validateEmail(value)) {
+      setEmailError("Invalid email format");
+    } else {
+      setEmailError("");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!email || !validateEmail(email)) {
+      setEmailError("Please enter a valid email address");
+      return;
+    }
     try {
       await dispatch(initiateForgetPassword({ email })).unwrap();
-      localStorage.setItem('resetEmail', email);
-      toast.success('OTP sent to your email');
-      navigate('/verifyOTP', { state: { purpose: 'resetPassword' } });
+      localStorage.setItem("resetEmail", email);
+      toast.success("OTP sent to your email");
+      navigate("/verifyOTP", { state: { purpose: "resetPassword" } });
     } catch (error) {
-      toast.error(error.message || 'Failed to send OTP');
+      toast.error(error.message || "Failed to send OTP");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-indigo-200 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-2xl">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Forgot Password</h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Enter your email address to receive a password reset OTP
-          </p>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email-address" className="sr-only">Email address</label>
-              <input
-                id="email-address"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-          </div>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: "linear-gradient(to bottom right, #E0E7FF, #C7D2FE)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        py: 12,
+        px: 4,
+      }}
+    >
+      <Container maxWidth="xs">
+        <Paper
+          elevation={3}
+          sx={{
+            p: 4,
+            borderRadius: 4,
+            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+            backgroundColor: "white",
+          }}
+        >
+          <Box sx={{ mb: 4, textAlign: "center" }}>
+            <Typography variant="h4" component="h1" fontWeight="bold">
+              <Box component="span" sx={{ color: "blue" }}>
+                Tech
+              </Box>
+              <Box component="span" sx={{ color: "black" }}>
+                Care
+              </Box>
+            </Typography>
+            <Typography variant="h6" sx={{ mt: 2, color: "text.secondary" }}>
+              Forgot Password
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 2, color: "text.secondary" }}>
+              Enter your email address to receive a password reset OTP
+            </Typography>
+          </Box>
 
-          <div>
-            <button
+          <form onSubmit={handleSubmit}>
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Email address"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={handleEmailChange}
+              error={!!emailError}
+              helperText={emailError || "Enter your registered email address"}
+              variant="outlined"
+              InputProps={{
+                sx: {
+                  ...(email &&
+                    !emailError && {
+                      "& fieldset": {
+                        borderColor: "green",
+                        borderWidth: 2,
+                      },
+                    }),
+                },
+              }}
+            />
+
+            <Button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              fullWidth
+              variant="contained"
+              sx={{
+                mt: 3,
+                mb: 2,
+                py: 1.5,
+                background: "linear-gradient(45deg, #6366F1 30%, #8B5CF6 90%)",
+                "&:hover": {
+                  background:
+                    "linear-gradient(45deg, #4F46E5 30%, #7C3AED 90%)",
+                },
+              }}
+              disabled={!email || !!emailError}
             >
               Send Reset OTP
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+            </Button>
+          </form>
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 

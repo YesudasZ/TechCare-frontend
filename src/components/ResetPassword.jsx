@@ -3,20 +3,73 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { resetPassword } from '../store/authSlice';
 import { toast } from 'react-toastify';
+import { IoLockClosedOutline } from "react-icons/io5";
+import {
+  Box,
+  TextField,
+  Typography,
+  Paper,
+  Container,
+  IconButton,
+  InputAdornment,
+  Button,
+} from "@mui/material";
+import {
+  Visibility,
+  VisibilityOff,
+} from "@mui/icons-material";
 
 const ResetPassword = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const validatePassword = (password) => {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return regex.test(password);
+  };
+
+  const handlePasswordChange = (e) => {
+    const value = e.target.value;
+    setNewPassword(value);
+    if (!value) {
+      setPasswordError('Password is required');
+    } else if (!validatePassword(value)) {
+      setPasswordError('Password must be at least 8 characters long and include at least one lowercase letter, one uppercase letter, one number, and one special character');
+    } else {
+      setPasswordError('');
+    }
+  };
+
+  const handleConfirmPasswordChange = (e) => {
+    const value = e.target.value;
+    setConfirmPassword(value);
+    if (!value) {
+      setConfirmPasswordError('Confirm password is required');
+    } else if (value !== newPassword) {
+      setConfirmPasswordError('Passwords do not match');
+    } else {
+      setConfirmPasswordError('');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      return toast.error('Passwords do not match');
+      setConfirmPasswordError('Passwords do not match');
+      return;
+    }
+    if (!validatePassword(newPassword)) {
+      setPasswordError('Password does not meet the requirements');
+      return;
     }
     try {
-        const email = localStorage.getItem("resetEmail")
+      const email = localStorage.getItem("resetEmail");
       await dispatch(resetPassword({ newPassword, email })).unwrap();
       toast.success('Password reset successful');
       navigate('/login');
@@ -26,52 +79,130 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-indigo-200 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-2xl">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Reset Password</h2>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="new-password" className="sr-only">New Password</label>
-              <input
-                id="new-password"
-                name="newPassword"
-                type="password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="New Password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
-            </div>
-            <div>
-              <label htmlFor="confirm-password" className="sr-only">Confirm Password</label>
-              <input
-                id="confirm-password"
-                name="confirmPassword"
-                type="password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-            </div>
-          </div>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: "linear-gradient(to bottom right, #E0E7FF, #C7D2FE)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        py: 12,
+        px: 4,
+      }}
+    >
+      <Container maxWidth="xs">
+        <Paper 
+          elevation={3} 
+          sx={{ 
+            p: 4, 
+            borderRadius: 4,
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          <Box sx={{ mb: 4, textAlign: "center" }}>
+            <Typography variant="h4" component="h1" fontWeight="bold">
+              <Box component="span" sx={{ color: "blue" }}>
+                Tech
+              </Box>
+              <Box component="span" sx={{ color: "black" }}>
+                Care
+              </Box>
+            </Typography>
+            <Typography variant="h6" sx={{ mt: 2, color: 'text.secondary' }}>
+              Reset Your Password
+            </Typography>
+          </Box>
 
-          <div>
-            <button
+          <form onSubmit={handleSubmit}>
+            <TextField
+              fullWidth
+              margin="normal"
+              label="New Password"
+              name="newPassword"
+              type={showNewPassword ? "text" : "password"}
+              required
+              value={newPassword}
+              onChange={handlePasswordChange}
+              error={!!passwordError}
+              helperText={passwordError || 'Password must be at least 8 characters long and include at least one lowercase letter, one uppercase letter, one number, and one special character'}
+              variant="outlined"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      edge="end"
+                    >
+                      {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                sx: {
+                  ...(newPassword && !passwordError && {
+                    '& fieldset': {
+                      borderColor: 'green',
+                      borderWidth: 2,
+                    },
+                  }),
+                },
+              }}
+            />
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Confirm Password"
+              name="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              required
+              value={confirmPassword}
+              onChange={handleConfirmPasswordChange}
+              error={!!confirmPasswordError}
+              helperText={confirmPasswordError || 'Re-enter your new password'}
+              variant="outlined"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      edge="end"
+                    >
+                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                sx: {
+                  ...(confirmPassword && !confirmPasswordError && {
+                    '& fieldset': {
+                      borderColor: 'green',
+                      borderWidth: 2,
+                    },
+                  }),
+                },
+              }}
+            />
+
+            <Button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              fullWidth
+              variant="contained"
+              sx={{
+                mt: 3,
+                mb: 2,
+                py: 1.5,
+                background: 'linear-gradient(45deg, #6366F1 30%, #8B5CF6 90%)',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #4F46E5 30%, #7C3AED 90%)',
+                },
+              }}
+              disabled={!newPassword || !confirmPassword || !!passwordError || !!confirmPasswordError}
+              startIcon={<IoLockClosedOutline />}
             >
               Reset Password
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+            </Button>
+          </form>
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 

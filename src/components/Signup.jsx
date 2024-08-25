@@ -1,14 +1,34 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { FaGoogle } from "react-icons/fa";
 import { IoPersonAddOutline } from "react-icons/io5";
-import { signupUser, clearError, setUser } from "../store/authSlice.js";
+import {
+  signupUser,
+  signupTechnician,
+  clearError,
+  setUser,
+} from "../store/authSlice.js";
 import { toast } from "react-toastify";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "../utils/axiosConfig.js";
+import {
+  Box,
+  TextField,
+  Typography,
+  Link,
+  Divider,
+  Paper,
+  Container,
+  IconButton,
+  InputAdornment,
+  Button,
+  FormHelperText,
+  FormControl,
+} from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
-const Signup = () => {
+const Signup = ({ role = "user" }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isLoading, error, user } = useSelector((state) => state.auth || {});
@@ -18,9 +38,17 @@ const Signup = () => {
     lastName: "",
     email: "",
     phoneNumber: "",
+    registrationNo: "",
+    aadharNo: "",
+    aadharPicture: "",
+    certificatePicture: "",
     password: "",
     confirmPassword: "",
   });
+
+  const [formErrors, setFormErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -31,21 +59,100 @@ const Signup = () => {
     };
   }, [user, navigate, dispatch]);
 
+  const validateField = (name, value) => {
+    let error = "";
+
+    switch (name) {
+      case "firstName":
+      case "lastName":
+        if (!/^[A-Za-z]+$/.test(value)) {
+          error = `${
+            name === "firstName" ? "First" : "Last"
+          } name must contain only letters.`;
+        }
+        break;
+      case "email":
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          error = "Please enter a valid email address.";
+        }
+        break;
+      case "phoneNumber":
+        if (!/^\d{10}$/.test(value)) {
+          error = "Phone number must contain exactly 10 digits.";
+        }
+        break;
+      case "registrationNo":
+        if (!/^[A-Za-z0-9]+$/.test(value)) {
+          error = "Registration number must contain only letters and numbers.";
+        }
+        break;
+      case "aadharNo":
+        if (!/^\d{12}$/.test(value)) {
+          error = "Aadhar number must contain exactly 12 digits.";
+        }
+        break;
+      case "password":
+        if (
+          !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
+            value
+          )
+        ) {
+          error =
+            "Password must be at least 8 characters long, include an uppercase letter, a number, and a special character.";
+        }
+        break;
+      case "confirmPassword":
+        if (value !== formData.password) {
+          error = "Passwords do not match.";
+        }
+        break;
+      default:
+        break;
+    }
+
+    setFormErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: error,
+    }));
+  };
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    validateField(name, value);
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    if (files.length > 0) {
+      const reader = new FileReader();
+      reader.readAsDataURL(files[0]);
+      reader.onload = () => {
+        setFormData({ ...formData, [name]: reader.result });
+      };
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords don't match");
+    Object.keys(formData).forEach((key) => validateField(key, formData[key]));
+
+    if (Object.values(formErrors).some((error) => error)) {
+      toast.error("Please fix the errors in the form.");
       return;
     }
-    dispatch(signupUser(formData))
+
+    const action = role === "technician" ? signupTechnician : signupUser;
+
+    dispatch(action(formData))
       .unwrap()
       .then(() => {
         localStorage.setItem("signupEmail", formData.email);
-        navigate("/verifyOTP");
+        if (action === signupTechnician) {
+          navigate("/verifyOTP", { state: { purpose: "technicianSignup" } });
+        } else {
+          navigate("/verifyOTP");
+        }
       })
       .catch((error) => {
         toast.error(error);
@@ -55,11 +162,14 @@ const Signup = () => {
   const handleGoogleSuccess = useGoogleLogin({
     onSuccess: async (codeResponse) => {
       try {
-        const response = await axios.post( "/auth/google",   { code: codeResponse.code }, { withCredentials: true } );
+        const response = await axios.post(
+          "/auth/google",
+          { code: codeResponse.code },
+          { withCredentials: true }
+        );
 
         if (response.data.user) {
           dispatch(setUser(response.data.user));
-          console.log("test",  JSON.stringify(response.data.user));
           localStorage.setItem("user", JSON.stringify(response.data.user));
           navigate("/");
         } else {
@@ -77,156 +187,342 @@ const Signup = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-indigo-200 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-2xl">
-        <div>
-          <h1 className="text-center text-2xl font-extrabold">
-            <span className="text-gray-400 drop-shadow-md">Tech</span>
-            <span className="text-black-600 drop-shadow-md">Care</span>
-          </h1>
-          <h2 className="mt-6 text-center text-2xl font-bold text-gray-900">
-            Create your account
-          </h2>
-        </div>
-        {error && <div className="text-red-500 text-center">{error}</div>}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <input
-                id="first-name"
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: "linear-gradient(to bottom right, #E0E7FF, #C7D2FE)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        py: 12,
+        px: 4,
+      }}
+    >
+      <Container maxWidth="sm">
+        <Paper
+          elevation={3}
+          sx={{
+            p: 4,
+            borderRadius: 4,
+            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+          }}
+        >
+          <Box sx={{ mb: 4, textAlign: "center" }}>
+            <Typography variant="h4" component="h1" fontWeight="bold">
+              <Box component="span" sx={{ color: "blue" }}>
+                Tech
+              </Box>
+              <Box component="span" sx={{ color: "black" }}>
+                Care
+              </Box>
+            </Typography>
+            <Typography variant="h6" sx={{ mt: 2, color: "text.secondary" }}>
+              {role === "technician"
+                ? "Create Technician Account"
+                : "Create your account"}
+            </Typography>
+          </Box>
+
+          {error && (
+            <Typography color="error" align="center" sx={{ mb: 2 }}>
+              {error}
+            </Typography>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <FormControl fullWidth margin="normal">
+              <TextField
                 name="firstName"
+                label="First Name"
                 type="text"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-                placeholder="First Name"
                 value={formData.firstName}
                 onChange={handleChange}
+                variant="outlined"
+                error={!!formErrors.firstName}
+                helperText={
+                  formErrors.firstName ||
+                  "First name must contain only letters."
+                }
               />
-            </div>
-            <div>
-              <input
-                id="last-name"
+            </FormControl>
+            <FormControl fullWidth margin="normal">
+              <TextField
                 name="lastName"
+                label="Last Name"
                 type="text"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-                placeholder="Last Name"
                 value={formData.lastName}
                 onChange={handleChange}
+                variant="outlined"
+                error={!!formErrors.lastName}
+                helperText={
+                  formErrors.lastName || "Last name must contain only letters."
+                }
               />
-            </div>
-            <div>
-              <input
-                id="email-address"
+            </FormControl>
+            <FormControl fullWidth margin="normal">
+              <TextField
                 name="email"
+                label="Email address"
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
                 value={formData.email}
                 onChange={handleChange}
+                variant="outlined"
+                error={!!formErrors.email}
+                helperText={formErrors.email || "Enter a valid email address."}
               />
-            </div>
-            <div>
-              <input
-                id="phone-number"
+            </FormControl>
+            <FormControl fullWidth margin="normal">
+              <TextField
                 name="phoneNumber"
+                label="Phone Number"
                 type="tel"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-                placeholder="Phone Number"
                 value={formData.phoneNumber}
                 onChange={handleChange}
+                variant="outlined"
+                error={!!formErrors.phoneNumber}
+                helperText={
+                  formErrors.phoneNumber || "Phone number must be 10 digits."
+                }
               />
-            </div>
-            <div>
-              <input
-                id="password"
+            </FormControl>
+
+            {role === "technician" && (
+              <>
+                <FormControl fullWidth margin="normal">
+                  <TextField
+                    name="registrationNo"
+                    label="Registration No."
+                    type="text"
+                    required
+                    value={formData.registrationNo}
+                    onChange={handleChange}
+                    variant="outlined"
+                    error={!!formErrors.registrationNo}
+                    helperText={
+                      formErrors.registrationNo ||
+                      "Registration number must contain only letters and numbers."
+                    }
+                  />
+                </FormControl>
+                <FormControl fullWidth margin="normal">
+                  <TextField
+                    name="aadharNo"
+                    label="Aadhar No."
+                    type="text"
+                    required
+                    value={formData.aadharNo}
+                    onChange={handleChange}
+                    variant="outlined"
+                    error={!!formErrors.aadharNo}
+                    helperText={
+                      formErrors.aadharNo || "Aadhar number must be 12 digits."
+                    }
+                  />
+                </FormControl>
+                <FormControl fullWidth margin="normal">
+                  <Button
+                    variant="contained"
+                    component="label"
+                    sx={{ mt: 2, mb: 2 }}
+                    error={!!formErrors.aadharPicture}
+                  >
+                    Upload Aadhar Picture
+                    <input
+                      type="file"
+                      name="aadharPicture"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      hidden
+                    />
+                  </Button>
+                  {formData.aadharPicture && (
+                    <Box sx={{ mt: 1 }}>
+                      <Typography variant="body2">Preview:</Typography>
+                      <img
+                        src={formData.aadharPicture}
+                        alt="Aadhar Preview"
+                        style={{ maxHeight: "100px", borderRadius: "5px" }}
+                      />
+                    </Box>
+                  )}
+                  <FormHelperText>{formErrors.aadharPicture}</FormHelperText>
+                </FormControl>
+                <FormControl fullWidth margin="normal">
+                  <Button
+                    variant="contained"
+                    component="label"
+                    sx={{ mt: 2, mb: 2 }}
+                    error={!!formErrors.certificatePicture}
+                  >
+                    Upload Certificate Picture
+                    <input
+                      type="file"
+                      name="certificatePicture"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      hidden
+                    />
+                  </Button>
+                  {formData.certificatePicture && (
+                    <Box sx={{ mt: 1 }}>
+                      <Typography variant="body2">Preview:</Typography>
+                      <img
+                        src={formData.certificatePicture}
+                        alt="Certificate Preview"
+                        style={{ maxHeight: "100px", borderRadius: "5px" }}
+                      />
+                    </Box>
+                  )}
+                  <FormHelperText>
+                    {formErrors.certificatePicture}
+                  </FormHelperText>
+                </FormControl>
+              </>
+            )}
+
+            <FormControl fullWidth margin="normal">
+              <TextField
                 name="password"
-                type="password"
+                label="Password"
+                type={showPassword ? "text" : "password"}
                 autoComplete="new-password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
+                variant="outlined"
+                error={!!formErrors.password}
+                helperText={
+                  formErrors.password ||
+                  "Password must be at least 8 characters, include an uppercase letter, a number, and a special character."
+                }
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
-            </div>
-            <div>
-              <input
-                id="confirm-password"
+            </FormControl>
+            <FormControl fullWidth margin="normal">
+              <TextField
                 name="confirmPassword"
-                type="password"
+                label="Confirm Password"
+                type={showConfirmPassword ? "text" : "password"}
                 autoComplete="new-password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-                placeholder="Confirm Password"
                 value={formData.confirmPassword}
                 onChange={handleChange}
+                variant="outlined"
+                error={!!formErrors.confirmPassword}
+                helperText={
+                  formErrors.confirmPassword || "Passwords must match."
+                }
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
+                        edge="end"
+                      >
+                        {showConfirmPassword ? (
+                          <VisibilityOff />
+                        ) : (
+                          <Visibility />
+                        )}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
-            </div>
-          </div>
+            </FormControl>
 
-          <div>
-            <button
+            <Button
               type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-300 ease-in-out transform hover:scale-105"
+              fullWidth
+              variant="contained"
+              sx={{
+                mt: 3,
+                mb: 2,
+                py: 1.5,
+                background: "linear-gradient(45deg, #6366F1 30%, #8B5CF6 90%)",
+                "&:hover": {
+                  background:
+                    "linear-gradient(45deg, #4F46E5 30%, #7C3AED 90%)",
+                },
+              }}
               disabled={isLoading}
+              startIcon={<IoPersonAddOutline />}
             >
-              <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                <IoPersonAddOutline
-                  className="h-5 w-5 text-purple-300 group-hover:text-purple-200"
-                  aria-hidden="true"
-                />
-              </span>
               {isLoading ? "Signing up..." : "Sign up"}
-            </button>
-          </div>
-        </form>
+            </Button>
+          </form>
 
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">
-                Or continue with
-              </span>
-            </div>
-          </div>
+          {role === "user" && (
+            <>
+              <Divider sx={{ my: 3 }}>Or continue with</Divider>
+              <Button
+                onClick={handleGoogleSuccess}
+                fullWidth
+                variant="outlined"
+                sx={{
+                  py: 1.5,
+                  color: "text.secondary",
+                  borderColor: "rgba(0, 0, 0, 0.23)",
+                  "&:hover": {
+                    backgroundColor: "rgba(0, 0, 0, 0.04)",
+                  },
+                }}
+                startIcon={<FaGoogle style={{ color: "#DB4437" }} />}
+              >
+                Sign up with Google
+              </Button>
+            </>
+          )}
+          <Divider sx={{ my: 3 }} />
 
-          {/* <div className="mt-6">
-            <button className="w-full flex items-center justify-center px-4 py-3 border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-300 ease-in-out transform hover:scale-105">
-              <FaGoogle className="mr-2 text-red-500" />
-              Sign up with Google
-            </button>
-          </div> */}
-          <div className="mt-6">
-            <button
-              onClick={handleGoogleSuccess}
-              className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-            >
-              <FaGoogle className="mr-2 text-red-500" />
-              Sign up with Google
-            </button>
-          </div>
-        </div>
-
-        <div className="text-center mt-4">
-          <p className="text-sm text-gray-600">
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="font-medium text-purple-600 hover:text-purple-500"
-            >
-              Sign in
-            </Link>
-          </p>
-        </div>
-      </div>
-    </div>
+          <Typography variant="body2" align="center" sx={{ mt: 3 }}>
+            {role === "technician" ? (
+              <>
+                Already have an account?{" "}
+                <Link
+                  component={RouterLink}
+                  to="/login-technician"
+                  color="primary"
+                  underline="hover"
+                >
+                  Sign in as Technician
+                </Link>
+              </>
+            ) : (
+              <>
+                Already have an account?{" "}
+                <Link
+                  component={RouterLink}
+                  to="/login"
+                  color="primary"
+                  underline="hover"
+                >
+                  Sign in
+                </Link>
+              </>
+            )}
+          </Typography>
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 

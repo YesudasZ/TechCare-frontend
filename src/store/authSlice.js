@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../utils/axiosConfig";
 
-const storedUser = JSON.parse(localStorage.getItem('user'));
+const storedUser = JSON.parse(localStorage.getItem("user"));
 
 const initialState = {
   user: storedUser || null,
@@ -14,6 +14,18 @@ export const signupUser = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await axios.post("/auth/signup", userData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const signupTechnician = createAsyncThunk(
+  "auth/signupTechnician",
+  async (technicianData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post("/technician/signup", technicianData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -75,37 +87,45 @@ export const initiateForgetPassword = createAsyncThunk(
   "auth/initiateForgetPassword",
   async ({ email }, { rejectWithValue }) => {
     try {
-      const response = await axios.post('/auth/forget-password/initiate',{email });
+      const response = await axios.post("/auth/forget-password/initiate", {
+        email,
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
   }
-)
+);
 
 export const verifyForgetPasswordOTP = createAsyncThunk(
   "auth/verifyForgetPasswordOTP",
-  async({ otp, email }, { rejectWithValue }) => {
+  async ({ otp, email }, { rejectWithValue }) => {
     try {
-      const response = await axios.post('/auth/forget-password/verify-otp',{ otp, email });
+      const response = await axios.post("/auth/forget-password/verify-otp", {
+        otp,
+        email,
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
   }
-)
+);
 
 export const resetPassword = createAsyncThunk(
   "auth/resetPassword",
   async ({ newPassword, email }, { rejectWithValue }) => {
     try {
-      const response = await axios.post('/auth/forget-password/reset',{ newPassword, email });
+      const response = await axios.post("/auth/forget-password/reset", {
+        newPassword,
+        email,
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
   }
-)
+);
 
 const authSlice = createSlice({
   name: "auth",
@@ -133,6 +153,18 @@ const authSlice = createSlice({
         state.user = action.payload;
       })
       .addCase(signupUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(signupTechnician.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(signupTechnician.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.user;
+      })
+      .addCase(signupTechnician.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })
