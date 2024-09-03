@@ -127,6 +127,30 @@ export const resetPassword = createAsyncThunk(
   }
 );
 
+export const checkAuthStatus = createAsyncThunk(
+  "auth/checkStatus",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get("/auth/status");
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const refreshToken = createAsyncThunk(
+  "auth/refreshToken",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.post("/auth/refreshToken");
+      return response.data;
+    } catch(error){
+      return rejectWithValue(error.response.data)
+    }
+    }
+)
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -245,6 +269,19 @@ const authSlice = createSlice({
       .addCase(resetPassword.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+      })
+      .addCase(checkAuthStatus.fulfilled, (state, action) => {
+        state.user = action.payload.user;
+      })
+      .addCase(checkAuthStatus.rejected, (state) => {
+        state.user = null;
+      })
+      .addCase(refreshToken.fulfilled, () => {
+       
+      })
+      .addCase(refreshToken.rejected, (state) => {
+        state.user = null;
+        localStorage.removeItem("user");
       });
   },
 });

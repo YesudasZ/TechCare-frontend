@@ -283,11 +283,11 @@
 //         if (response.data.user) {
 //           dispatch(setUser(response.data.user));
 //           localStorage.setItem("user", JSON.stringify(response.data.user));
-          // if (response.data.user.role === "admin") {
-          //   navigate("/admin");
-          // } else {
-          //   navigate("/");
-          // }
+// if (response.data.user.role === "admin") {
+//   navigate("/admin");
+// } else {
+//   navigate("/");
+// }
 //         } else {
 //           toast.error("Failed to authenticate with Google");
 //         }
@@ -479,7 +479,7 @@
 
 import { IoLogInOutline } from "react-icons/io5";
 import { FaGoogle } from "react-icons/fa";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import { loginUser, setUser } from "../store/authSlice";
@@ -508,22 +508,34 @@ const Login = ({ role = "user" }) => {
   const [showPassword, setShowPassword] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoading, error } = useSelector((state) => state.user);
+  const { isLoading, error, user } = useSelector((state) => state.user);
+
+  // useEffect(() => {
+  //   if (user) {
+  //     if (user.role === "admin") {
+  //       navigate("/admin", { replace: true });
+  //     } else if (user.role === "technician") {
+  //       navigate("/technician", { replace: true });
+  //     } else {
+  //       navigate("/", { replace: true });
+  //     }
+  //   }
+  // }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const result = await dispatch(loginUser({ email, password }));
       // console.log("test",result.payload.user);
-      
+
       if (loginUser.fulfilled.match(result)) {
         toast.success("Login successful");
         if (result.payload.user.role === "admin") {
-          navigate("/admin");
+          navigate("/admin", { replace: true });
         } else if (role === "technician") {
-          navigate("/technician"); 
+          navigate("/technician", { replace: true });
         } else {
-          navigate("/");
+          navigate("/", { replace: true });
         }
       }
     } catch (err) {
@@ -543,7 +555,7 @@ const Login = ({ role = "user" }) => {
         if (response.data.user) {
           dispatch(setUser(response.data.user));
           localStorage.setItem("user", JSON.stringify(response.data.user));
-          navigate("/");
+          navigate("/", { replace: true });
         } else {
           toast.error("Failed to authenticate with Google");
         }
@@ -689,31 +701,31 @@ const Login = ({ role = "user" }) => {
           )}
 
           <Typography variant="body2" align="center" sx={{ mt: 3 }}>
-          {role === "technician" ? (
+            {role === "technician" ? (
               <>
-                 Don't have an account?{" "}
+                Don't have an account?{" "}
                 <Link
                   component={RouterLink}
                   to="/signup-technician"
                   color="primary"
                   underline="hover"
                 >
-                   Sign Up
+                  Sign Up
                 </Link>
               </>
-            ) :  (
+            ) : (
               <>
-                 Don't have an account?{" "}
+                Don't have an account?{" "}
                 <Link
                   component={RouterLink}
                   to="/signup"
                   color="primary"
                   underline="hover"
                 >
-                   Sign Up
+                  Sign Up
                 </Link>
               </>
-            ) }
+            )}
           </Typography>
         </Paper>
       </Container>
@@ -724,7 +736,7 @@ const Login = ({ role = "user" }) => {
           right: 20,
         }}
       >
-{role === "user" ? (
+        {role === "user" ? (
           <>
             <Link component={RouterLink} to="/login-technician">
               <Button
@@ -747,7 +759,7 @@ const Login = ({ role = "user" }) => {
               </Button>
             </Link>
           </>
-        ):(
+        ) : (
           <>
             <Link component={RouterLink} to="/login">
               <Button
