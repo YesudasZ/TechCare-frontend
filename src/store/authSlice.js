@@ -151,6 +151,79 @@ export const refreshToken = createAsyncThunk(
     }
 )
 
+
+export const updateUserProfile = createAsyncThunk(
+  "auth/updateProfile",
+  async (userData, { rejectWithValue }) => {
+    try {
+      const response = await axios.put("/auth/update-profile", userData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const updateUserAddress = createAsyncThunk(
+  "auth/updateAddress",
+  async (addressData, { rejectWithValue }) => {
+    try {
+      const response = await axios.put("/auth/update-address", addressData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const getUserAddresses = createAsyncThunk(
+  "auth/getUserAddresses",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get("/auth/addresses");
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const deleteUserAddress = createAsyncThunk(
+  "auth/deleteAddress",
+  async (addressId, { rejectWithValue }) => {
+    try {
+      const response = await axios.delete(`/auth/address/${addressId}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const updateUserPassword = createAsyncThunk(
+  "auth/updatePassword",
+  async (passwordData, { rejectWithValue }) => {
+    try {
+      const response = await axios.put("/auth/update-password", passwordData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const updateProfilePicture = createAsyncThunk(
+  "auth/updateProfilePicture",
+  async (imageData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post("/auth/update-profile-picture", imageData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -282,7 +355,30 @@ const authSlice = createSlice({
       .addCase(refreshToken.rejected, (state) => {
         state.user = null;
         localStorage.removeItem("user");
-      });
+      })
+      .addCase(updateUserProfile.fulfilled, (state, action) => {
+        state.user = action.payload.user;
+      })
+      .addCase(updateUserAddress.fulfilled, (state, action) => {
+        if (!state.user.addresses) {
+          state.user.addresses = [];
+        }
+        const index = state.user.addresses.findIndex(addr => addr._id === action.payload.address._id);
+        if (index !== -1) {
+          state.user.addresses[index] = action.payload.address;
+        } else {
+          state.user.addresses.push(action.payload.address);
+        }
+      })
+      .addCase(getUserAddresses.fulfilled, (state, action) => {
+        state.user.addresses = action.payload.addresses;
+      })
+      .addCase(deleteUserAddress.fulfilled, (state, action) => {
+        state.user.addresses = state.user.addresses.filter(addr => addr._id !== action.payload.addressId);
+      })
+      .addCase(updateProfilePicture.fulfilled, (state, action) => {
+        state.user.profilePicture = action.payload.profilePicture;
+      });;
   },
 });
 

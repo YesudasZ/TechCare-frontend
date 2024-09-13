@@ -49,6 +49,10 @@ const Signup = ({ role = "user" }) => {
   const [formErrors, setFormErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [filePreview, setFilePreview] = useState({
+    aadharPicture: null,
+    certificatePicture: null,
+  });
 
   useEffect(() => {
     if (user) {
@@ -125,11 +129,53 @@ const Signup = ({ role = "user" }) => {
   const handleFileChange = (e) => {
     const { name, files } = e.target;
     if (files.length > 0) {
+      const file = files[0];
       const reader = new FileReader();
-      reader.readAsDataURL(files[0]);
+
       reader.onload = () => {
         setFormData({ ...formData, [name]: reader.result });
+        setFilePreview({
+          ...filePreview,
+          [name]: { data: reader.result, type: file.type },
+        });
       };
+
+      if (file.type === "application/pdf" || file.type.startsWith("image/")) {
+        reader.readAsDataURL(file);
+      }
+    }
+  };
+
+  const renderFilePreview = (fieldName) => {
+    const file = filePreview[fieldName];
+
+    if (!file) return null;
+
+    if (file.type === "application/pdf") {
+      return (
+        <Box sx={{ mt: 1 }}>
+          <Typography variant="body2">PDF Preview:</Typography>
+          <embed
+            src={file.data}
+            type="application/pdf"
+            width="100%"
+            height="200px"
+          />
+        </Box>
+      );
+    } else if (file.type.startsWith("image/")) {
+      return (
+        <Box sx={{ mt: 1 }}>
+          <Typography variant="body2">Image Preview:</Typography>
+          <img
+            src={file.data}
+            alt={`${fieldName} Preview`}
+            style={{ maxHeight: "100px", borderRadius: "5px" }}
+          />
+        </Box>
+      );
+    } else {
+      return null;
     }
   };
 
@@ -159,32 +205,60 @@ const Signup = ({ role = "user" }) => {
       });
   };
 
+  // const handleGoogleSuccess = useGoogleLogin({
+  //   onSuccess: async (codeResponse) => {
+  //     try {
+  //       const response = await axios.post(
+  //         "/auth/google",
+  //         { code: codeResponse.code },
+  //         { withCredentials: true }
+  //       );
+
+  //       if (response.data.user) {
+  //         dispatch(setUser(response.data.user));
+  //         localStorage.setItem("user", JSON.stringify(response.data.user));
+  //         navigate("/");
+  //       } else {
+  //         toast.error("Failed to authenticate with Google");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error during Google sign-up:", error);
+  //       toast.error(
+  //         error.response?.data?.message ||
+  //           "An error occurred during Google sign-up"
+  //       );
+  //     }
+  //   },
+  //   flow: "auth-code",
+  // });
+
   const handleGoogleSuccess = useGoogleLogin({
     onSuccess: async (codeResponse) => {
       try {
         const response = await axios.post(
           "/auth/google",
-          { code: codeResponse.code },
+          { code: codeResponse.code, role:role },
           { withCredentials: true }
         );
 
         if (response.data.user) {
           dispatch(setUser(response.data.user));
           localStorage.setItem("user", JSON.stringify(response.data.user));
-          navigate("/");
+          if (role === "technician") {
+            navigate("/technician", { replace: true });
+          } else {
+            navigate("/", { replace: true });
+          }
         } else {
           toast.error("Failed to authenticate with Google");
         }
       } catch (error) {
-        console.error("Error during Google sign-up:", error);
-        toast.error(
-          error.response?.data?.message ||
-            "An error occurred during Google sign-up"
-        );
+        toast.error("Error during Google sign-up");
       }
     },
     flow: "auth-code",
   });
+
 
   return (
     <Box
@@ -329,55 +403,36 @@ const Signup = ({ role = "user" }) => {
                     variant="contained"
                     component="label"
                     sx={{ mt: 2, mb: 2 }}
-                    error={!!formErrors.aadharPicture}
                   >
-                    Upload Aadhar Picture
+                    Upload Aadhar Picture/PDF
                     <input
                       type="file"
                       name="aadharPicture"
-                      accept="image/*"
+                      accept="image/*,application/pdf"
                       onChange={handleFileChange}
                       hidden
                     />
                   </Button>
-                  {formData.aadharPicture && (
-                    <Box sx={{ mt: 1 }}>
-                      <Typography variant="body2">Preview:</Typography>
-                      <img
-                        src={formData.aadharPicture}
-                        alt="Aadhar Preview"
-                        style={{ maxHeight: "100px", borderRadius: "5px" }}
-                      />
-                    </Box>
-                  )}
+                  {renderFilePreview("aadharPicture")}
                   <FormHelperText>{formErrors.aadharPicture}</FormHelperText>
                 </FormControl>
+
                 <FormControl fullWidth margin="normal">
                   <Button
                     variant="contained"
                     component="label"
                     sx={{ mt: 2, mb: 2 }}
-                    error={!!formErrors.certificatePicture}
                   >
-                    Upload Certificate Picture
+                    Upload Certificate Picture/PDF
                     <input
                       type="file"
                       name="certificatePicture"
-                      accept="image/*"
+                      accept="image/*,application/pdf"
                       onChange={handleFileChange}
                       hidden
                     />
                   </Button>
-                  {formData.certificatePicture && (
-                    <Box sx={{ mt: 1 }}>
-                      <Typography variant="body2">Preview:</Typography>
-                      <img
-                        src={formData.certificatePicture}
-                        alt="Certificate Preview"
-                        style={{ maxHeight: "100px", borderRadius: "5px" }}
-                      />
-                    </Box>
-                  )}
+                  {renderFilePreview("certificatePicture")}
                   <FormHelperText>
                     {formErrors.certificatePicture}
                   </FormHelperText>
@@ -470,8 +525,7 @@ const Signup = ({ role = "user" }) => {
             </Button>
           </form>
 
-          {role === "user" && (
-            <>
+       
               <Divider sx={{ my: 3 }}>Or continue with</Divider>
               <Button
                 onClick={handleGoogleSuccess}
@@ -489,8 +543,7 @@ const Signup = ({ role = "user" }) => {
               >
                 Sign up with Google
               </Button>
-            </>
-          )}
+          
           <Divider sx={{ my: 3 }} />
 
           <Typography variant="body2" align="center" sx={{ mt: 3 }}>
