@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch, } from 'react-redux';
+import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import {
   Card,
   CardContent,
@@ -18,67 +18,64 @@ import {
   Alert,
   Grid,
   Box,
-} from '@mui/material';
-import { CameraAlt, Loop, Upload } from '@mui/icons-material';
+} from "@mui/material";
+import { CameraAlt, Loop, Upload } from "@mui/icons-material";
 import {
   updateTechnicianProfile,
   updateTechnicianPassword,
   updateTechnicianProfilePicture,
   completeTechnicianProfile,
-} from '../../store/technicianSlice';
+} from "../../store/technicianSlice";
 
 const TechnicianProfile = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.user);
-  
- 
-  const isProfileComplete = user?.isProfileComplete || false;
-  // const isGoogleAuth = user?.isGoogleAuth || false;
 
+  const isProfileComplete = user?.isProfileComplete || false;
   const [profileData, setProfileData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    phoneNumber: user?.phoneNumber || '',
-    profilePicture: user?.profilePicture || '',
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    phoneNumber: user?.phoneNumber || "",
+    profilePicture: user?.profilePicture || "",
   });
 
   const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
   const [documentData, setDocumentData] = useState({
-    registrationNo: user?.registrationNo || '',
-    aadharNo: user?.aadharNo || '',
-    aadharPicture: user?.aadharPicture || '',
-    certificatePicture: user?.certificatePicture || '',
+    registrationNo: user?.registrationNo || "",
+    aadharNo: user?.aadharNo || "",
+    aadharPicture: user?.aadharPicture || "",
+    certificatePicture: user?.certificatePicture || "",
   });
 
   const [isLoading, setIsLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
-    message: '',
-    severity: 'success',
+    message: "",
+    severity: "success",
   });
 
   const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
-  const [enlargedFile, setEnlargedFile] = useState({ type: '', file: '' });
+  const [enlargedFile, setEnlargedFile] = useState({ type: "", file: "" });
   const [tabValue, setTabValue] = useState(0);
 
   useEffect(() => {
     if (user) {
       setProfileData({
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        phoneNumber: user.phoneNumber || '',
-        profilePicture: user.profilePicture || '',
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        phoneNumber: user.phoneNumber || "",
+        profilePicture: user.profilePicture || "",
       });
       setDocumentData({
-        registrationNo: user.registrationNo || '',
-        aadharNo: user.aadharNo || '',
-        aadharPicture: user.aadharPicture || '',
-        certificatePicture: user.certificatePicture || '',
+        registrationNo: user.registrationNo || "",
+        aadharNo: user.aadharNo || "",
+        aadharPicture: user.aadharPicture || "",
+        certificatePicture: user.certificatePicture || "",
       });
     }
   }, [user]);
@@ -101,14 +98,14 @@ const TechnicianProfile = () => {
       await dispatch(updateTechnicianProfile(profileData)).unwrap();
       setSnackbar({
         open: true,
-        message: 'Profile updated successfully',
-        severity: 'success',
+        message: "Profile updated successfully",
+        severity: "success",
       });
     } catch (error) {
       setSnackbar({
         open: true,
-        message: error.message || 'Failed to update profile',
-        severity: 'error',
+        message: error.message || "Failed to update profile",
+        severity: "error",
       });
     } finally {
       setIsLoading(false);
@@ -119,8 +116,8 @@ const TechnicianProfile = () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       setSnackbar({
         open: true,
-        message: 'New passwords do not match',
-        severity: 'error',
+        message: "New passwords do not match",
+        severity: "error",
       });
       return;
     }
@@ -135,14 +132,14 @@ const TechnicianProfile = () => {
       setOpenPasswordDialog(false);
       setSnackbar({
         open: true,
-        message: 'Password updated successfully',
-        severity: 'success',
+        message: "Password updated successfully",
+        severity: "success",
       });
     } catch (error) {
       setSnackbar({
         open: true,
-        message: error.message || 'Failed to update password',
-        severity: 'error',
+        message: error.message || "Failed to update password",
+        severity: "error",
       });
     } finally {
       setIsLoading(false);
@@ -165,14 +162,14 @@ const TechnicianProfile = () => {
           }));
           setSnackbar({
             open: true,
-            message: 'Profile picture updated successfully',
-            severity: 'success',
+            message: "Profile picture updated successfully",
+            severity: "success",
           });
         } catch (error) {
           setSnackbar({
             open: true,
-            message: error.message || 'Failed to update profile picture',
-            severity: 'error',
+            message: error.message || "Failed to update profile picture",
+            severity: "error",
           });
         } finally {
           setIsLoading(false);
@@ -202,14 +199,14 @@ const TechnicianProfile = () => {
       await dispatch(completeTechnicianProfile(documentData)).unwrap();
       setSnackbar({
         open: true,
-        message: 'Profile completed successfully',
-        severity: 'success',
+        message: "Profile completed successfully",
+        severity: "success",
       });
     } catch (error) {
       setSnackbar({
         open: true,
-        message: error.message || 'Failed to complete profile',
-        severity: 'error',
+        message: error.message || "Failed to complete profile",
+        severity: "error",
       });
     } finally {
       setIsLoading(false);
@@ -222,7 +219,7 @@ const TechnicianProfile = () => {
   const handleFileClick = (fileUrl) => {
     if (isImageFile(fileUrl) || isPdfFile(fileUrl)) {
       setEnlargedFile({
-        type: isPdfFile(fileUrl) ? 'pdf' : 'image',
+        type: isPdfFile(fileUrl) ? "pdf" : "image",
         file: fileUrl,
       });
     }
@@ -239,9 +236,9 @@ const TechnicianProfile = () => {
             src={fileUrl}
             alt={`${fieldName} Preview`}
             style={{
-              maxHeight: '100px',
-              borderRadius: '5px',
-              cursor: 'pointer',
+              maxHeight: "100px",
+              borderRadius: "5px",
+              cursor: "pointer",
             }}
             onClick={() => handleFileClick(fileUrl)}
           />
@@ -265,7 +262,7 @@ const TechnicianProfile = () => {
   };
 
   return (
-    <Card sx={{ maxWidth: 800, margin: 'auto', mt: 5 }}>
+    <Card sx={{ maxWidth: 800, margin: "auto", mt: 5 }}>
       <CardHeader title="Technician Profile" />
       <CardContent>
         <Tabs
@@ -278,7 +275,6 @@ const TechnicianProfile = () => {
           <Tab label="Security" />
         </Tabs>
 
-   
         {tabValue === 0 && (
           <Grid container spacing={2} sx={{ mt: 2 }}>
             <Grid
@@ -286,9 +282,9 @@ const TechnicianProfile = () => {
               xs={12}
               md={4}
               sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
               }}
             >
               <Avatar
@@ -299,7 +295,7 @@ const TechnicianProfile = () => {
                 accept="image/*"
                 id="icon-button-file"
                 type="file"
-                style={{ display: 'none' }}
+                style={{ display: "none" }}
                 onChange={handleProfilePictureChange}
               />
               <label htmlFor="icon-button-file">
@@ -341,7 +337,7 @@ const TechnicianProfile = () => {
               <TextField
                 fullWidth
                 label="Email"
-                value={user?.email || ''}
+                value={user?.email || ""}
                 disabled
                 margin="normal"
               />
@@ -352,16 +348,14 @@ const TechnicianProfile = () => {
                 startIcon={isLoading ? <Loop /> : null}
                 sx={{ mt: 2 }}
               >
-                {isLoading ? 'Updating...' : 'Update Profile'}
+                {isLoading ? "Updating..." : "Update Profile"}
               </Button>
             </Grid>
           </Grid>
         )}
 
-   
         {tabValue === 1 && (
           <Grid container spacing={2} sx={{ mt: 2 }}>
-     
             <Grid item xs={12} md={6}>
               <Typography variant="h6" gutterBottom>
                 Aadhaar Card
@@ -379,8 +373,8 @@ const TechnicianProfile = () => {
                 accept="image/*,application/pdf"
                 id="aadhar-file"
                 type="file"
-                style={{ display: 'none' }}
-                onChange={(e) => handleDocumentUpload(e, 'aadharPicture')}
+                style={{ display: "none" }}
+                onChange={(e) => handleDocumentUpload(e, "aadharPicture")}
                 disabled={isProfileComplete}
               />
               <label htmlFor="aadhar-file">
@@ -394,10 +388,9 @@ const TechnicianProfile = () => {
                   Upload Aadhaar Picture
                 </Button>
               </label>
-              {renderFilePreview('aadharPicture', documentData.aadharPicture)}
+              {renderFilePreview("aadharPicture", documentData.aadharPicture)}
             </Grid>
 
-         
             <Grid item xs={12} md={6}>
               <Typography variant="h6" gutterBottom>
                 Certificate
@@ -415,10 +408,8 @@ const TechnicianProfile = () => {
                 accept="image/*,application/pdf"
                 id="certificate-file"
                 type="file"
-                style={{ display: 'none' }}
-                onChange={(e) =>
-                  handleDocumentUpload(e, 'certificatePicture')
-                }
+                style={{ display: "none" }}
+                onChange={(e) => handleDocumentUpload(e, "certificatePicture")}
                 disabled={isProfileComplete}
               />
               <label htmlFor="certificate-file">
@@ -433,12 +424,11 @@ const TechnicianProfile = () => {
                 </Button>
               </label>
               {renderFilePreview(
-                'certificatePicture',
+                "certificatePicture",
                 documentData.certificatePicture
               )}
             </Grid>
 
-   
             {!isProfileComplete && (
               <Grid item xs={12}>
                 <Button
@@ -448,14 +438,13 @@ const TechnicianProfile = () => {
                   startIcon={isLoading ? <Loop /> : null}
                   sx={{ mt: 2 }}
                 >
-                  {isLoading ? 'Submitting...' : 'Complete Profile'}
+                  {isLoading ? "Submitting..." : "Complete Profile"}
                 </Button>
               </Grid>
             )}
           </Grid>
         )}
 
- 
         {tabValue === 2 && (
           <Grid container spacing={2} sx={{ mt: 2 }}>
             <Grid item xs={12}>
@@ -501,20 +490,19 @@ const TechnicianProfile = () => {
         )}
       </CardContent>
 
-  
       <Dialog
         open={!!enlargedFile.file}
-        onClose={() => setEnlargedFile({ type: '', file: '' })}
+        onClose={() => setEnlargedFile({ type: "", file: "" })}
         maxWidth="md"
         fullWidth
       >
         <DialogTitle>Enlarged File</DialogTitle>
         <DialogContent>
-          {enlargedFile.type === 'image' ? (
+          {enlargedFile.type === "image" ? (
             <img
               src={enlargedFile.file}
               alt="Enlarged"
-              style={{ width: '100%' }}
+              style={{ width: "100%" }}
             />
           ) : (
             <object
@@ -524,7 +512,7 @@ const TechnicianProfile = () => {
               height="600px"
             >
               <p>
-                It appears you don't have a PDF plugin for this browser. You can{' '}
+                It appears you don't have a PDF plugin for this browser. You can{" "}
                 <a
                   href={enlargedFile.file}
                   target="_blank"
@@ -537,12 +525,11 @@ const TechnicianProfile = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEnlargedFile({ type: '', file: '' })}>
+          <Button onClick={() => setEnlargedFile({ type: "", file: "" })}>
             Close
           </Button>
         </DialogActions>
       </Dialog>
-
 
       <Dialog
         open={openPasswordDialog}
@@ -560,12 +547,11 @@ const TechnicianProfile = () => {
             color="primary"
             disabled={isLoading}
           >
-            {isLoading ? 'Updating...' : 'Confirm'}
+            {isLoading ? "Updating..." : "Confirm"}
           </Button>
         </DialogActions>
       </Dialog>
 
- 
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
@@ -583,3 +569,6 @@ const TechnicianProfile = () => {
 };
 
 export default TechnicianProfile;
+
+
+

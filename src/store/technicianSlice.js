@@ -47,7 +47,7 @@ export const updateTechnicianProfilePicture = createAsyncThunk(
   "technician/updateProfilePicture",
   async (imageData, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/technician/update-profile-picture", imageData);
+      const response = await axios.patch("/technician/update-profile-picture", imageData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -59,7 +59,7 @@ export const completeTechnicianProfile = createAsyncThunk(
   "technician/completeProfile",
   async (profileData, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/technician/complete-profile", profileData);
+      const response = await axios.patch("/technician/complete-profile", profileData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);

@@ -1,10 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../utils/axiosConfig";
 
-const storedUser = JSON.parse(localStorage.getItem("user"));
+// const storedUser = JSON.parse(localStorage.getItem("user"));
 
 const initialState = {
-  user: storedUser || null,
+  user: null,
   isLoading: false,
   error: null,
 };
@@ -61,8 +61,12 @@ export const loginUser = createAsyncThunk(
   "auth/login",
   async (userData, { rejectWithValue }) => {
     try {
+      console.log("inside",userData);
+      
       const response = await axios.post("/auth/login", userData);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+      // localStorage.setItem("user", JSON.stringify(response.data.user));
+      // console.log("auth",response);
+      
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -82,6 +86,19 @@ export const logoutUser = createAsyncThunk(
     }
   }
 );
+
+export const refreshToken = createAsyncThunk(
+  "auth/refreshToken",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.post("/auth/refreshToken");
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 
 export const initiateForgetPassword = createAsyncThunk(
   "auth/initiateForgetPassword",
@@ -116,7 +133,7 @@ export const resetPassword = createAsyncThunk(
   "auth/resetPassword",
   async ({ newPassword, email }, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/auth/forget-password/reset", {
+      const response = await axios.patch("/auth/forget-password/reset", {
         newPassword,
         email,
       });
@@ -139,19 +156,6 @@ export const checkAuthStatus = createAsyncThunk(
   }
 );
 
-export const refreshToken = createAsyncThunk(
-  "auth/refreshToken",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await axios.post("/auth/refreshToken");
-      return response.data;
-    } catch(error){
-      return rejectWithValue(error.response.data)
-    }
-    }
-)
-
-
 export const updateUserProfile = createAsyncThunk(
   "auth/updateProfile",
   async (userData, { rejectWithValue }) => {
@@ -168,7 +172,7 @@ export const updateUserAddress = createAsyncThunk(
   "auth/updateAddress",
   async (addressData, { rejectWithValue }) => {
     try {
-      const response = await axios.put("/auth/update-address", addressData);
+      const response = await axios.patch("/auth/update-address", addressData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -216,7 +220,7 @@ export const updateProfilePicture = createAsyncThunk(
   "auth/updateProfilePicture",
   async (imageData, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/auth/update-profile-picture", imageData);
+      const response = await axios.patch("/auth/update-profile-picture", imageData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -237,6 +241,9 @@ const authSlice = createSlice({
     },
     setUser: (state, action) => {
       state.user = action.payload;
+           if (action.payload && action.payload.accessToken) {
+        state.user.accessToken = action.payload.accessToken;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -310,6 +317,12 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload.message;
       })
+      .addCase(refreshToken.fulfilled, (state, action) => {
+        state.user = action.payload.user;
+      })
+      .addCase(refreshToken.rejected, (state) => {
+        state.user = null;
+      })
       .addCase(initiateForgetPassword.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -348,13 +361,6 @@ const authSlice = createSlice({
       })
       .addCase(checkAuthStatus.rejected, (state) => {
         state.user = null;
-      })
-      .addCase(refreshToken.fulfilled, () => {
-       
-      })
-      .addCase(refreshToken.rejected, (state) => {
-        state.user = null;
-        localStorage.removeItem("user");
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.user = action.payload.user;

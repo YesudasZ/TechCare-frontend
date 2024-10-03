@@ -55,7 +55,7 @@ const ForgetPasswordEmail = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(to bottom right, #E0E7FF, #C7D2FE)",
+        background: "linear-gradient(to bottom,#6B7280, #000000 )",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

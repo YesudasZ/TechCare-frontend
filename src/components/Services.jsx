@@ -1,7 +1,3 @@
-
-
-//**better one */
-
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiBatteryCharging, FiTv, FiTool, FiDroplet } from 'react-icons/fi';
@@ -201,5 +197,3 @@ const Services = () => {
 };
 
 export default Services;
-
-//**end */

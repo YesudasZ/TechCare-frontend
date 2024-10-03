@@ -216,7 +216,7 @@ const Services = () => {
       };
 
       if (editingService) {
-        await axios.put(`/admin/service-types/${editingService._id}`, data);
+        await axios.patch(`/admin/service-types/${editingService._id}`, data);
       } else {
         await axios.post("/admin/service-types", data);
       }

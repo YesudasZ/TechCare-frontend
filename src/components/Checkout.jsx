@@ -51,10 +51,7 @@ const Checkout = () => {
               };
   
               const verificationResponse = await axios.post('/auth/payment/verify', paymentData);
-
-  
               if (verificationResponse.data.success === true) {
-
                 const serviceRequestData = {
                   serviceType: serviceType._id,
                   appointmentDate: selectedDate.toISOString().split('T')[0],

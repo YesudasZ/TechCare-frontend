@@ -71,7 +71,7 @@ const Schedule = () => {
 
   const handleAddAddress = async () => {
     try {
-      await axios.put("/auth/update-address", newAddress);
+      await axios.patch("/auth/update-address", newAddress);
       setNewAddress({
         street: "",
         city: "",
@@ -116,9 +116,7 @@ const Schedule = () => {
           <h2 className="text-3xl font-bold mb-6 text-gray-800">
             Schedule Your Service
           </h2>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Date and Time Selection */}
             <div>
               <div className="mb-8">
                 <h3 className="text-xl font-semibold mb-4 flex items-center">
@@ -157,10 +155,7 @@ const Schedule = () => {
                 </div>
               </div>
             </div>
-
-            {/* Service Type and Address Selection */}
             <div>
-              {/* Service Type Info */}
               {serviceType && (
                 <div className="shadow-md mb-8 p-4 rounded-lg bg-gray-50">
                   <h3 className="text-xl font-semibold mb-2 text-blue-600">
@@ -179,8 +174,6 @@ const Schedule = () => {
                   )}
                 </div>
               )}
-
-              {/* Address Selection */}
               <div className="mb-8">
                 <h3 className="text-xl font-semibold mb-4 flex items-center">
                   <FiMapPin className="mr-2 text-blue-500" />
@@ -216,8 +209,6 @@ const Schedule = () => {
               </div>
             </div>
           </div>
-
-          {/* Checkout Button */}
           <motion.button
             onClick={handleCheckout}
             className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center mt-8"
@@ -231,7 +222,6 @@ const Schedule = () => {
         </div>
       </div>
 
-      {/* Address Modal */}
       {isAddressModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <motion.div

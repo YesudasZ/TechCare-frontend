@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
@@ -110,7 +110,7 @@ const OTPVerify = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(to bottom right, #E0E7FF, #C7D2FE)",
+        background: "linear-gradient(to bottom,#6B7280, #000000 )",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

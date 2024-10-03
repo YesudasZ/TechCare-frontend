@@ -5,18 +5,17 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import ChatIcon from '@mui/icons-material/Chat';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import SettingsIcon from '@mui/icons-material/Settings';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+// import SettingsIcon from '@mui/icons-material/Settings';
+// import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 const drawerWidth = 240;
-
 const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/technician' },
   { text: 'Services', icon: <AssignmentIcon />, path: '/technician/services' },
   { text: 'Chats', icon: <ChatIcon />, path: '/technician/chats' },
   { text: 'Wallet', icon: <AccountBalanceWalletIcon />, path: '/technician/wallet' },
-  { text: 'Settings', icon: <SettingsIcon />, path: '/technician/settings' },
-  { text: 'Logout', icon: <ExitToAppIcon />, path: '/logout' },
+  // { text: 'Settings', icon: <SettingsIcon />, path: '/technician/settings' },
+  // { text: 'Logout', icon: <ExitToAppIcon />, path: '/logout' },
 ];
 
 const TechnicianSidebar = () => {
