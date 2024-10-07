@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useState , useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { initiateForgetPassword } from "../store/authSlice";
 import { toast } from "react-toastify";
@@ -14,9 +14,17 @@ import {
 
 const ForgetPasswordEmail = () => {
   const [email, setEmail] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [emailError, setEmailError] = useState("");
+  const { user } = useSelector((state) => state.user);
+
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    } 
+  }, [user, navigate]);
+
+  const dispatch = useDispatch();
 
   const validateEmail = (email) => {
     const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;

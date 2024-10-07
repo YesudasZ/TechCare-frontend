@@ -25,9 +25,22 @@ const OTPVerify = () => {
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const [otpError, setOtpError] = useState("");
+  const { user } = useSelector((state) => state.user);
+
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    } 
+  }, [user, navigate]);
   
   const purpose = location.state?.purpose || 'signup';
 
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    } 
+  }, [user, navigate]);
+  
   useEffect(() => {
     const storedEmail = localStorage.getItem(purpose === "resetPassword" ? "resetEmail" : "signupEmail");
     if (storedEmail) {

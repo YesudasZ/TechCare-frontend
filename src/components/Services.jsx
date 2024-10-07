@@ -12,7 +12,6 @@ const Services = () => {
   const navigate = useNavigate();
 
   const handleBook = (id) => {
-    console.log("daniel",id)
     navigate(`/schedule/${id}`);
   };
 

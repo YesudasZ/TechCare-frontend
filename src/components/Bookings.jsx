@@ -224,7 +224,7 @@ const Bookings = () => {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
-    <div className="bg-gradient-to-b from-gray-500 to-black pt-20 pb-12 px-4 sm:px-6 lg:px-8 min-h-screen">
+    <div className="bg-gradient-to-b from-gray-500 to-black pt-20 pb-12 px-4 sm:px-6 lg:px-8 min-h-screen ">
       <motion.h1
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -262,7 +262,7 @@ const Bookings = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.5 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            className="grid  grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-20"
           >
             {currentServices.map((service) => (
               <motion.div
@@ -624,3 +624,4 @@ const Bookings = () => {
 };
 
 export default Bookings;
+

@@ -71,24 +71,25 @@ const Profile = () => {
 
   const validateField = (name, value) => {
     let error = "";
+    const stringValue = String(value || "");
     switch (name) {
       case "firstName":
       case "lastName":
-        if (!/^[A-Za-z]+$/.test(value.trim())) {
+        if (!/^[A-Za-z]+$/.test(stringValue.trim())) {
           error = `${
             name === "firstName" ? "First" : "Last"
           } name must contain only letters.`;
         }
         break;
       case "phoneNumber":
-        if (!/^\d{10}$/.test(value.trim())) {
+        if (!/^\d{10}$/.test(stringValue.trim())) {
           error = "Phone number must be exactly 10 digits.";
         }
         break;
       case "newPassword":
         if (
           !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])(?=.{8,})/.test(
-            value
+            stringValue
           )
         ) {
           error =
@@ -96,7 +97,7 @@ const Profile = () => {
         }
         break;
       case "confirmPassword":
-        if (value !== password.newPassword) {
+        if (stringValue !== password.newPassword) {
           error = "Passwords do not match.";
         }
         break;
@@ -104,14 +105,14 @@ const Profile = () => {
       case "city":
       case "state":
       case "country":
-        if (!/^[A-Za-z\s]+$/.test(value.trim())) {
+        if (!/^[A-Za-z\s]+$/.test(stringValue.trim())) {
           error = `${
             name.charAt(0).toUpperCase() + name.slice(1)
           } must contain only letters and spaces.`;
         }
         break;
       case "postalCode":
-        if (!/^[A-Za-z0-9]+$/.test(value.trim())) {
+        if (!/^[A-Za-z0-9]+$/.test(stringValue.trim())) {
           error = "Postal code must contain only letters and numbers.";
         }
         break;
@@ -147,6 +148,9 @@ const Profile = () => {
 
   const isFormValid = (formData) => {
     const formErrors = Object.keys(formData).reduce((acc, key) => {
+      if (formData[key] === undefined || formData[key] === null) {
+        return acc;
+      }
       const error = validateField(key, formData[key]);
       if (error) acc[key] = error;
       return acc;
@@ -197,7 +201,11 @@ const Profile = () => {
   };
 
   const handleProfileUpdate = async () => {
-    if (!isFormValid(profileData)) {
+    const trimmedProfileData = Object.keys(profileData).reduce((acc, key) => {
+      acc[key] = typeof profileData[key] === 'string' ? profileData[key].trim() : profileData[key];
+      return acc;
+    }, {});
+    if (!isFormValid(trimmedProfileData)) {
       setSnackbar({
         open: true,
         message: "Please fix the errors in the form.",
@@ -208,7 +216,7 @@ const Profile = () => {
 
     setIsLoading(true);
     try {
-      await dispatch(updateUserProfile(profileData)).unwrap();
+      await dispatch(updateUserProfile(trimmedProfileData)).unwrap();
       setSnackbar({
         open: true,
         message: "Profile updated successfully",
@@ -226,7 +234,11 @@ const Profile = () => {
   };
 
   const handleAddressUpdate = async () => {
-    if (!isFormValid(newAddress)) {
+      const trimmedAddress = Object.keys(newAddress).reduce((acc, key) => {
+    acc[key] = typeof newAddress[key] === 'string' ? newAddress[key].trim() : newAddress[key];
+    return acc;
+  }, {});
+    if (!isFormValid(trimmedAddress)) {
       setSnackbar({
         open: true,
         message: "Please fix the errors in the form.",
@@ -240,8 +252,8 @@ const Profile = () => {
       await dispatch(
         updateUserAddress(
           selectedAddress
-            ? { ...newAddress, addressId: selectedAddress._id }
-            : newAddress
+            ? { ...trimmedAddress, addressId: selectedAddress._id }
+            : trimmedAddress
         )
       ).unwrap();
       setSnackbar({
@@ -325,7 +337,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-gray-500 to-black  text-white py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -752,3 +764,6 @@ const Snackbar = ({ open, message, severity, onClose }) => {
 };
 
 export default Profile;
+
+
+

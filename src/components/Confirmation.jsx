@@ -61,8 +61,6 @@ const Confirmation = () => {
                 </div>
               </div>
             </div>
-
-            {/* Service Address */}
             <motion.div
               className="bg-gray-100 rounded-lg p-6 shadow-lg"
               initial={{ opacity: 0 }}
@@ -78,8 +76,6 @@ const Confirmation = () => {
               <p>{service.address.country} - {service.address.postalCode}</p>
               <p>Phone: {service.address.phoneNumber}</p>
             </motion.div>
-
-            {/* Payment Status */}
             <motion.div
               className="bg-green-100 rounded-lg p-6 shadow-lg"
               initial={{ opacity: 0 }}
@@ -93,8 +89,6 @@ const Confirmation = () => {
               <p className="text-green-600 font-bold">Paid: ₹{service.amount}</p>
               <p>Payment ID: {service.paymentId}</p>
             </motion.div>
-
-            {/* Encouragement Message */}
             <div className="text-center mb-6">
               <p className="text-2xl font-semibold text-purple-600 mb-2">
                 "You did your part, the rest is up to our team!"
@@ -103,8 +97,6 @@ const Confirmation = () => {
                 "Take a break, we'll handle the rest!"
               </p>
             </div>
-
-            {/* View My Bookings Button */}
             <motion.div
               className="text-center"
               whileHover={{ scale: 1.05 }}

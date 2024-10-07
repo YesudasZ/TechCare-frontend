@@ -1,8 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../utils/axiosConfig";
 
-// const storedUser = JSON.parse(localStorage.getItem("user"));
-
 const initialState = {
   user: null,
   isLoading: false,
@@ -61,12 +59,7 @@ export const loginUser = createAsyncThunk(
   "auth/login",
   async (userData, { rejectWithValue }) => {
     try {
-      console.log("inside",userData);
-      
       const response = await axios.post("/auth/login", userData);
-      // localStorage.setItem("user", JSON.stringify(response.data.user));
-      // console.log("auth",response);
-      
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -172,7 +165,7 @@ export const updateUserAddress = createAsyncThunk(
   "auth/updateAddress",
   async (addressData, { rejectWithValue }) => {
     try {
-      const response = await axios.patch("/auth/update-address", addressData);
+      const response = await axios.put("/auth/update-address", addressData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);

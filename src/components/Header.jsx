@@ -163,7 +163,7 @@ const Header = () => {
             <NavLink component={Link} to="/services">
               Services
             </NavLink>
-            <NavLink component={Link} to="/about">
+            <NavLink component={Link} to="/about-us">
               About Us
             </NavLink>
           </Box>

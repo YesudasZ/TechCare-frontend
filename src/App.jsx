@@ -43,6 +43,8 @@ const AdminWallet = React.lazy(()=> import("./components/admin/AdminWallet"));
 const AdminTasks = React.lazy(()=> import("./components/admin/AdminTasks"))
 const Complaints = React.lazy(() => import("./components/admin/Complaints"));
 const TechnicianWallet = React.lazy(() => import("./components/technician/TechnicianWallet"))
+const PaymentFailure = React.lazy(() => import("./components/PaymentFailure") )
+const AboutUs = React.lazy(()=> import("./components/AboutUs"))
 
 const LoadingSpinner = () => (
   <div className="flex justify-center items-center h-screen">
@@ -79,6 +81,7 @@ function AppLayout() {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/login-technician" element={<Login role="technician" />} />
             <Route path="/signup-technician" element={<Signup role="technician" />} />
+            <Route path="/about-us" element={<AboutUs />} />
             
             <Route element={<ProtectedRoute allowedRoles={["user"]} />}>
               <Route path="/profile" element={<Profile />} />
@@ -87,6 +90,7 @@ function AppLayout() {
               <Route path="/booking-confirmation" element={<Confirmation />} />
               <Route path="/bookings" element={<Bookings />} />
               <Route path="/wallet" element={<Wallet />} />
+              <Route path="/payment-failure" element={<PaymentFailure />} />
             </Route>
             
             <Route element={<ProtectedRoute allowedRoles={["technician"]} />}>

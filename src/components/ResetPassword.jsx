@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { resetPassword } from '../store/authSlice';
 import { toast } from 'react-toastify';
@@ -26,8 +26,16 @@ const ResetPassword = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
+  const {  user } = useSelector((state) => state.user);
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    } 
+  }, [user, navigate]);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  
 
   const validatePassword = (password) => {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;

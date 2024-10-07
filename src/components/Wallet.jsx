@@ -52,7 +52,7 @@ const Wallet = () => {
           </div>
           <div className="bg-blue-100 rounded-lg p-6 mb-8">
             <p className="text-lg text-gray-600 mb-2">Current Balance</p>
-            <p className="text-4xl font-bold text-blue-600">${balance.toFixed(2)}</p>
+            <p className="text-4xl font-bold text-blue-600">₹{balance.toFixed(2)}</p>
           </div>
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Transaction History</h2>
           <div className="space-y-4">
@@ -73,14 +73,14 @@ const Wallet = () => {
                   <div>
                     <p className="font-medium text-gray-800">{transaction.description}</p>
                     <p className="text-sm text-gray-500">
-                      {new Date(transaction.createdAt).toLocaleDateString()}
+                    {new Date(transaction.date).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
                 <p className={`font-semibold ${
                   transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'
                 }`}>
-                  {transaction.type === 'credit' ? '+' : '-'}${transaction.amount.toFixed(2)}
+                  {transaction.type === 'credit' ? '+' : '-'}₹{transaction.amount.toFixed(2)}
                 </p>
               </motion.div>
             ))}

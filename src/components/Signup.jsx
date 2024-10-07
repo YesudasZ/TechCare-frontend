@@ -31,7 +31,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 const Signup = ({ role = "user" }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoading, error, user } = useSelector((state) => state.auth || {});
+  const { isLoading, error, user } = useSelector((state) => state.user || {});
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -58,9 +58,6 @@ const Signup = ({ role = "user" }) => {
     if (user) {
       navigate("/");
     }
-    return () => {
-      dispatch(clearError());
-    };
   }, [user, navigate, dispatch]);
 
   const validateField = (name, value) => {
