@@ -17,7 +17,7 @@ const ChatWindow = ({ service, onClose, currentUser }) => {
   const isTechnician = currentUser.role === 'technician';
 
   useEffect(() => {
-    const newSocket = io('http://localhost:3000', {
+    const newSocket = io('https://techcare.live', {
       withCredentials: true,
     });
 
