@@ -87,7 +87,7 @@ const Header = () => {
 
   useEffect(() => {
     if (user) {
-      const socket = io('https://techcare.live', { withCredentials: true });
+      const socket = io('https://techcare-backend.onrender.com', { withCredentials: true });
       socket.on('connect', () => {
         console.log('Connected to Socket.IO server');
         socket.emit('join user room', user.id);
