@@ -64,10 +64,10 @@ const Complaints = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  const handleSearch = (event) => {
-    setSearchQuery(event.target.value);
-    setCurrentPage(1);
-  };
+  // const handleSearch = (event) => {
+  //   setSearchQuery(event.target.value);
+  //   setCurrentPage(1);
+  // };
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);

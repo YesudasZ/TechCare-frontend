@@ -14,7 +14,7 @@ import {
   TextField,
   Modal,
   Avatar,
-  IconButton,
+  // IconButton,
   Snackbar,
   Alert,
   Dialog,
@@ -24,7 +24,7 @@ import {
   DialogTitle,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import CloseIcon from "@mui/icons-material/Close";
+// import CloseIcon from "@mui/icons-material/Close";
 import axios from "../../utils/axiosConfig";
 
 const Customers = () => {

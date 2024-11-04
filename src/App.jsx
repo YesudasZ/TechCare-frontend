@@ -45,6 +45,7 @@ const Complaints = React.lazy(() => import("./components/admin/Complaints"));
 const TechnicianWallet = React.lazy(() => import("./components/technician/TechnicianWallet"))
 const PaymentFailure = React.lazy(() => import("./components/PaymentFailure") )
 const AboutUs = React.lazy(()=> import("./components/AboutUs"))
+const NotFound = React.lazy(() => import("./components/NotFound"));
 
 const LoadingSpinner = () => (
   <div className="flex justify-center items-center h-screen">
@@ -115,6 +116,7 @@ function AppLayout() {
                 <Route path="complaints" element={<Complaints />} />
               </Route>
             </Route>
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
       </main>
